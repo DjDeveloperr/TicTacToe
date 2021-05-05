@@ -13,7 +13,8 @@ import {
   MessageComponentData,
   Collection,
   Interaction,
-} from "https://raw.githubusercontent.com/DjDeveloperr/harmony/refactor/mod.ts";
+  MessageComponentInteraction,
+} from "../../Deno/Harmony/mod.ts";
 import { TOKEN } from "./config.ts";
 import { generate } from "https://deno.land/std@0.94.0/uuid/v4.ts";
 
@@ -79,6 +80,7 @@ export class Game {
                 ? ButtonStyle.Success
                 : ButtonStyle.Destructive,
             label: e === 0 ? "\u200b" : e === 1 ? "X" : "O",
+            disabled: this.winner || this.ended ? true : false,
             customID:
               this.winner || this.ended
                 ? "null"
@@ -138,7 +140,7 @@ export class Game {
     }
   }
 
-  async playUserTurn(id: string, cell: number) {
+  async playUserTurn(id: string, cell: number, d: MessageComponentInteraction) {
     const state: State | undefined =
       this.users[0].id === id
         ? State.X
@@ -154,14 +156,15 @@ export class Game {
     } else {
       this.nextTurn();
     }
-    await this.update();
+    this.checkComputerTurn();
+    await this.update(d);
   }
 
   get isComputerPlaying() {
     return typeof this.users[1] === "boolean";
   }
 
-  async checkComputerTurn() {
+  checkComputerTurn() {
     if (this.winner || this.ended) return;
     if (!this.isComputerPlaying) return;
 
@@ -213,10 +216,9 @@ export class Game {
     } else {
       this.nextTurn();
     }
-    await this.update();
   }
 
-  async update() {
+  async update(d?: MessageComponentInteraction) {
     try {
       if (this.winner || this.ended) {
         if (games.has(this.users[0].id)) games.delete(this.users[0].id);
@@ -243,7 +245,7 @@ export class Game {
         },
       };
 
-      if (this.d.responded) await this.d.editResponse(data);
+      if (d) await d.respond({ type: 7, ...data });
       else await this.d.respond(data);
     } catch (e) {
       console.log(e);
@@ -312,15 +314,13 @@ export class MyClient extends Client {
     if (isMessageComponentInteraction(d)) {
       if (d.customID === "null") return d.respond({ type: 6 });
       if (d.customID.startsWith("ttt::")) {
-        d.respond({ type: 6 });
         const game = findUserGame(d.user.id);
         if (!game) return;
         const [_, _cell, nonce] = d.customID.split("::");
         const cell = Number(_cell);
-        if (game.nonce !== nonce) return;
-        if (!game.checkUserTurn(d.user.id)) return;
-        await game.playUserTurn(d.user.id, cell);
-        await game.checkComputerTurn();
+        if (game.nonce !== nonce) return d.respond({ type: 6 });
+        if (!game.checkUserTurn(d.user.id)) return d.respond({ type: 6 });
+        await game.playUserTurn(d.user.id, cell, d);
       }
     }
   }
