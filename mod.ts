@@ -14,7 +14,7 @@ import {
   Collection,
   Interaction,
   MessageComponentInteraction,
-} from "../../Deno/Harmony/mod.ts";
+} from "https://deno.land/x/harmony@v2.0.0-rc2/mod.ts";
 import { TOKEN } from "./config.ts";
 import { generate } from "https://deno.land/std@0.94.0/uuid/v4.ts";
 
@@ -75,10 +75,10 @@ export class Game {
             type: MessageComponentType.Button,
             style:
               e === 0
-                ? ButtonStyle.Secondary
+                ? ButtonStyle.SECONDARY
                 : e === 1
-                ? ButtonStyle.Success
-                : ButtonStyle.Destructive,
+                ? ButtonStyle.SUCCESS
+                : ButtonStyle.DESTRUCTIVE,
             label: e === 0 ? "\u200b" : e === 1 ? "X" : "O",
             disabled: this.winner || this.ended ? true : false,
             customID:
