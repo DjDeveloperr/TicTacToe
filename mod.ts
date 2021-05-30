@@ -1,19 +1,19 @@
 import {
-  Client,
-  slash,
-  event,
   ButtonStyle,
-  MessageComponentType,
-  isMessageComponentInteraction,
-  SlashCommandPartial,
-  SlashCommandOptionType,
-  SlashCommandInteraction,
-  InteractionUser,
-  User,
-  MessageComponentData,
+  Client,
   Collection,
+  event,
   Interaction,
+  InteractionUser,
+  isMessageComponentInteraction,
+  MessageComponentData,
   MessageComponentInteraction,
+  MessageComponentType,
+  slash,
+  SlashCommandInteraction,
+  SlashCommandOptionType,
+  SlashCommandPartial,
+  User,
 } from "https://deno.land/x/harmony@v2.0.0-rc2/mod.ts";
 import { TOKEN } from "./config.ts";
 import { generate } from "https://deno.land/std@0.94.0/uuid/v4.ts";
@@ -47,7 +47,7 @@ export class Game {
 
   constructor(
     public users: [User, User | boolean],
-    public d: SlashCommandInteraction
+    public d: SlashCommandInteraction,
   ) {
     this.nonce = generate();
   }
@@ -73,20 +73,16 @@ export class Game {
           i++;
           return {
             type: MessageComponentType.Button,
-            style:
-              e === 0
-                ? ButtonStyle.SECONDARY
-                : e === 1
-                ? ButtonStyle.SUCCESS
-                : ButtonStyle.DESTRUCTIVE,
+            style: e === 0
+              ? ButtonStyle.SECONDARY
+              : e === 1
+              ? ButtonStyle.SUCCESS
+              : ButtonStyle.DESTRUCTIVE,
             label: e === 0 ? "\u200b" : e === 1 ? "X" : "O",
             disabled: this.winner || this.ended ? true : false,
-            customID:
-              this.winner || this.ended
-                ? "null"
-                : e === 0
-                ? `ttt::${i}::${this.nonce}`
-                : "null",
+            customID: this.winner || this.ended ? "null" : e === 0
+              ? `ttt::${i}::${this.nonce}`
+              : "null",
           };
         }),
       };
@@ -141,12 +137,11 @@ export class Game {
   }
 
   async playUserTurn(id: string, cell: number, d: MessageComponentInteraction) {
-    const state: State | undefined =
-      this.users[0].id === id
-        ? State.X
-        : typeof this.users[1] === "object" && this.users[1].id === id
-        ? State.O
-        : undefined;
+    const state: State | undefined = this.users[0].id === id
+      ? State.X
+      : typeof this.users[1] === "object" && this.users[1].id === id
+      ? State.O
+      : undefined;
     if (!state) return;
     if (this.get(cell) !== State.None) return;
     this.set(cell, state);
@@ -226,19 +221,19 @@ export class Game {
       const data = {
         content: this.winner
           ? `Game has ended! ${
-              this.winner === "Tie"
-                ? "It was a tie!"
-                : this.winner === "Computer"
-                ? "Computer has won!"
-                : `<@${this.winner.id}> has won!`
-            }`
+            this.winner === "Tie"
+              ? "It was a tie!"
+              : this.winner === "Computer"
+              ? "Computer has won!"
+              : `<@${this.winner.id}> has won!`
+          }`
           : this.turnOf === 0
           ? `<@${this.users[0].id}>'s turn`
           : `${
-              typeof this.users[1] === "boolean"
-                ? "Computer's"
-                : `<@${this.users[1].id}>'s`
-            } turn`,
+            typeof this.users[1] === "boolean"
+              ? "Computer's"
+              : `<@${this.users[1].id}>'s`
+          } turn`,
         components: this.buttons(),
         allowedMentions: {
           parse: [],
@@ -275,7 +270,8 @@ export const commands: SlashCommandPartial[] = [
 ];
 
 export class MyClient extends Client {
-  @event() ready() {
+  @event()
+  ready() {
     console.log("Connected!");
     this.slash.commands.all().then((cmds) => {
       if (cmds.size !== commands.length) {
@@ -286,18 +282,22 @@ export class MyClient extends Client {
     });
   }
 
-  @slash() async play(d: SlashCommandInteraction) {
-    if (findUserGame(d.user.id))
+  @slash()
+  async play(d: SlashCommandInteraction) {
+    if (findUserGame(d.user.id)) {
       return d.reply("You're already playing!", { ephemeral: true });
+    }
     const user = d.option<InteractionUser>("user");
-    if (user && findUserGame(user.id))
+    if (user && findUserGame(user.id)) {
       return d.reply("The other user is already playing!", { ephemeral: true });
+    }
     const game = new Game([d.user, user === undefined ? true : user], d);
     games.set(d.user.id, game);
     await game.update();
   }
 
-  @slash() async leave(d: SlashCommandInteraction) {
+  @slash()
+  async leave(d: SlashCommandInteraction) {
     const game = findUserGame(d.user.id);
     if (!game) return d.reply("You're not even playing!", { ephemeral: true });
     d.reply("Game has ended.");
@@ -306,11 +306,12 @@ export class MyClient extends Client {
       content: `<@${d.user.id}> has left the game`,
       components: game.buttons(),
       allowedMentions: { parse: [] },
-    });
+    }).catch(() => {});
     games.delete(game.users[0].id);
   }
 
-  @event() async interactionCreate(d: Interaction) {
+  @event()
+  async interactionCreate(d: Interaction) {
     if (isMessageComponentInteraction(d)) {
       if (d.customID === "null") return d.respond({ type: 6 });
       if (d.customID.startsWith("ttt::")) {
