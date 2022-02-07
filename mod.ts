@@ -180,10 +180,13 @@ export function GameComponent(game: Game): {
   };
 }
 
-harmony.handle("play", async (d) => {
+harmony.handle("tictactoe", async (d) => {
   const user = d.option<harmony.InteractionUser | undefined>("user")?.id ?? BOT_ID;
   if (d.option<harmony.InteractionUser | undefined>("user")?.bot) {
     return d.reply("Cannot play with a Bot!", { ephemeral: true });
+  }
+  if (user.id === d.user.id) {
+    return d.reply("Cannot play with yourself!", { ephemeral: true });
   }
 
   const rand = user === BOT_ID ? 0 : Math.floor(Math.random() * 2);
