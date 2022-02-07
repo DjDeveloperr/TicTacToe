@@ -13,7 +13,7 @@ Note: Global commands may take some long time to come up.
 
 ## License
 
-Check [LICENSE](./LICENSE) for more info.
+[MIT licensed.](./LICENSE).
 
 
-Copyright 2021 @ DjDeveloperr
+Copyright 2022 © DjDeveloperr
