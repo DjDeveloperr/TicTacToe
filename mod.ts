@@ -53,7 +53,7 @@ export function deserialize(state: string): Game {
 
 export const commands: harmony.SlashCommandPartial[] = [
   {
-    name: "play",
+    name: "tictactoe",
     description: "Start playing TicTacToe.",
     options: [
       {
@@ -64,15 +64,9 @@ export const commands: harmony.SlashCommandPartial[] = [
       },
     ],
   },
-  {
-    name: "invite",
-    description: "Invite me to your server.",
-  },
 ];
 
 harmony.commands.all().then((cmds) => {
-  console.log("Fetched Commands", cmds.size);
-  console.log("Exptected Size", commands.length);
   if (cmds.size !== commands.length) {
     console.log("Syncing Commands...");
     harmony.commands.bulkEdit(commands).then(() => {
@@ -289,11 +283,4 @@ harmony.client.on("interaction", async (d) => {
       });
     } else d.respond({ type: 6 });
   }
-});
-
-harmony.handle("invite", (d) => {
-  d.reply(
-    "• [Click here to Invite.](<https://discord.com/api/oauth2/authorize?client_id=834996135327825950&scope=applications.commands>)\n• [Support me on Ko-fi.](<https://ko-fi.com/DjDeveloper>)\n• Made by [DjDeveloper#7777](<https://discord.com/users/422957901716652033>).",
-    { ephemeral: true },
-  );
 });
