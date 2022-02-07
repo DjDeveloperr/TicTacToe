@@ -1,8 +1,5 @@
 import * as harmony from "https://code.harmony.rocks/v2.5.1/deploy";
-import {
-  ButtonStyle,
-  MessageComponentData,
-} from "https://code.harmony.rocks/v2.5.1/src/types/messageComponents.ts";
+import { MessageComponentData } from "https://code.harmony.rocks/v2.5.1/src/types/messageComponents.ts";
 import { isMessageComponentInteraction } from "https://code.harmony.rocks/v2.5.1/src/utils/interactions.ts";
 import ecoji from "https://esm.sh/ecoji-js";
 
@@ -147,19 +144,19 @@ export function GameComponent(game: Game): {
     components: [
       ...d2map.map((e): MessageComponentData => {
         return {
-          type: 1,
+          type: "ACTION_ROW",
           components: e.map((e): MessageComponentData => {
             ctr++;
             return {
-              type: 2,
+              type: "BUTTON",
               label: e === Cell.X ? "X" : e === Cell.O ? "O" : "\u200b",
               disabled: win === undefined ? false : true,
               customID: `${ecoji.encode(ctr.toString())}::${serialize(game)}`,
               style: e === Cell.X
-                ? ButtonStyle.RED
+                ? "GREEN"
                 : e === Cell.O
-                ? ButtonStyle.BLURPLE
-                : ButtonStyle.GREY,
+                ? "BLURPLE"
+                : "GREY",
             };
           }),
         };
@@ -172,7 +169,7 @@ export function GameComponent(game: Game): {
             label: "Leave",
             disabled: win === undefined ? false : true,
             customID: `${ecoji.encode("leave")}::${serialize(game)}`,
-            style: ButtonStyle.DANGER,
+            style: "RED",
           },
         ],
       },
@@ -183,7 +180,7 @@ export function GameComponent(game: Game): {
 harmony.handle("tictactoe", async (d) => {
   const user = d.option<harmony.InteractionUser | undefined>("user")?.id ?? BOT_ID;
   if (d.option<harmony.InteractionUser | undefined>("user")?.bot) {
-    return d.reply("Cannot play with a Bot!", { ephemeral: true });
+    return d.reply("Cannot play with a bot!", { ephemeral: true });
   }
   if (user.id === d.user.id) {
     return d.reply("Cannot play with yourself!", { ephemeral: true });
